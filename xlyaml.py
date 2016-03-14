@@ -228,27 +228,45 @@ class Collection():
         
         # Compile all elements down to indent level 0
         while maxIndent > 0 :
-            
+            logger.debug('evaluating while maxIndent > 0...')
+            logger.debug('maxIndent = %d', maxIndent)
+            logger.debug('workingResult = %s', workingResult)
+            logger.debug('indentList: %s', indentList)
+            logger.debug('parentList: %s', parentList)
             for idx in reversed(xrange(len(workingResult))):
+                logger.debug('evaluating idx: %s', str(idx))
                 if indentList[idx] == maxIndent:
+
                     this_parent = parentList[idx]
-                    ### print "this parent = ", this_parent
+                    logger.debug('this parent: %s', this_parent)
                     line_count = idx - this_parent
-                    ### print "line count = " , line_count
+                    logger.debug('line count: %s' , str(line_count))
                     
-                    this_obj = workingResult[this_parent : (this_parent + line_count) + 1]
-                    ### print "this obj = ", this_obj
+                    this_obj = \
+                        workingResult[this_parent:(this_parent+line_count) + 1]
+                    logger.debug('this_obj: %s', str(this_obj))
+
+                    logger.debug('building temp_item...')
                     temp_item = self.buildObject(this_obj)
-                    ### print "temp_item = ", temp_item
+                    logger.debug('temp_item = %s', temp_item)
+
                     workingResult[this_parent] = [temp_item]
-                    ### print "working result[this_parent] = ", workingResult[this_parent]
+                    logger.debug('working result[%s] = %s', \
+                        this_parent, workingResult[this_parent])
                     
-                    del workingResult[this_parent + 1 : (this_parent + line_count) + 1]
-                    del indentList[this_parent + 1 : (this_parent + line_count) + 1]
-                    del parentList[this_parent + 1 : (this_parent + line_count) + 1]
+                    start_del = this_parent + 1
+                    end_del = this_parent + line_count + 1
+                    logger.debug('deleting workingResult[%d:%d]...', \
+                        start_del, end_del)
+                    del workingResult[start_del : end_del]
+                    logger.debug('deleting indentList[%d:%d]...', \
+                        start_del, end_del)
+                    del indentList[start_del : end_del]
+                    logger.debug('recalculating parentList...')
+                    parentList = self.buildParentList(indentList)
                     
                     break
-            
+            logger.debug('reseting maxIndent')
             maxIndent = max(indentList)
         
         ### print "level 0 working result: \n", workingResult
