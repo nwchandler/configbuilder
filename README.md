@@ -25,3 +25,4 @@ Use the [Issues][issues] feature in GitHub to create a new feature request.
 ## Contributing to configbuilder
 
 configbuilder is written in Python and is currently maintained by Nick Chandler. If you would like to work on the code, please [contact Nick](mailto:nchandler@burwood.com). If you would like to contribute, but don't feel comfortable coding, documentation contributions are welcome. Also, please let us know if you would like to see any features added, using the [Issues][issues] page, so we can continue to improve the tools and make them more useful over time.
+[issues]: https://github.com/Burwood/configbuilder/issues
