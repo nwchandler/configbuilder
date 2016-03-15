@@ -28,6 +28,10 @@ obj/
 _ReSharper*/
 [Tt]est[Rr]esult*
 
+# Ignore compiled Python
+*.pyc
+__pycache__
+
 # Ignore Spreadsheets
 *.xlsx
 
