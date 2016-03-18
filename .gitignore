@@ -37,3 +37,6 @@ __pycache__
 
 # Ignore YAML Files
 *.yml
+
+# Ignore sample / demo directory
+[Ss]amples/
