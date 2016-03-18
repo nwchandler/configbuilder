@@ -2,7 +2,7 @@
 Module imports an Excel workbook and outputs a YAML file 
 """
 
-import sys, getopt
+import sys
 import logging
 import argparse
 
@@ -35,28 +35,28 @@ class Sheet():
         - Lines not separated from previous object by blank row are part
         of the previous object
         - Two cells that are side-by-side represent key-value pairs
-                    ________________
+                    _________________________
                     |    Key    |   Value   |
-        - Lists are represented by a left-cell, blank right-cell, and subsequent
+        - Lists are represented by a left-cell, blank right-cell, subsequent
         single cells in a column under the blank right-cell
-                    _________________
-                    |  Name    |   (blank)   |
-                    _________________
-                    | (blank)   |   Item 1    |
-                    _________________
-                    | (blank)   |   Item 2    |
-                    _________________
-                    | (blank)   |   Item 3    |
+                    ________________________
+                    |  Name    |   (blank)  |
+                    ________________________
+                    | (blank)   |   Item 1  |
+                    ________________________
+                    | (blank)   |   Item 2  |
+                    ________________________
+                    | (blank)   |   Item 3  |
          - Dictionaries are similar to lists, but with named indexes
-         in place of blank cells, including support for multiple named indexes
-                    ____________________________________
-                    |    Name    |   ID1     |    ID2       |   ID3            |
-                    ____________________________________
-                    |    (blank)  |   Item 1  |    Item 1   |   Item 1       |
-                    ____________________________________
-                    |    (blank)  |   Item 2  |    Item 2   |   Item 2       |
-                    ____________________________________
-                    |    (blank)  |   Item 3  |    Item 3   |   Item 3       |
+         in place of blank cells; supports multiple named indexes
+                    __________________________________________________
+                    |    Name    |   ID1     |    ID2     |   ID3     |
+                    __________________________________________________
+                    |    (blank)  |   Item 1  |    Item 1 |   Item 1  |
+                    __________________________________________________
+                    |    (blank)  |   Item 2  |    Item 2 |   Item 2  |
+                    __________________________________________________
+                    |    (blank)  |   Item 3  |    Item 3 |   Item 3  |
 
     """
     
