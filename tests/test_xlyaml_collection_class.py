@@ -14,5 +14,5 @@ def test_collection_class_buildOutput_builds_valid_yaml():
 		]
 	collection_object = xlyaml.Collection(sheet_object)
 
-	assert collection_object._this_collection == \
+	assert collection_object.collection == \
 		yaml.load(collection_object.buildOutput())
