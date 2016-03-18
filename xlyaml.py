@@ -301,6 +301,11 @@ class Collection():
             result = dump(self._this_collection, default_flow_style=False)
         
         return result
+
+    @property
+    def collection(self):
+        return self._this_collection
+    
     
     
 def xlyaml(source, output=None, format='yaml'):
