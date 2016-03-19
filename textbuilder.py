@@ -115,6 +115,7 @@ def textbuilder(temp=None, varfile=None, outfile='results.txt', fileid=None):
     # as general as desired.
     render_string = 'the_template.render('+varref+'=vars)'
     rendered = eval(render_string)
+    logging.debug('rendered: %s', str(rendered))
     
     # Write output file(s)
     # Write multiple files if fileid is set
