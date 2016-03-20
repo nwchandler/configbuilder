@@ -27,74 +27,142 @@ logger.addHandler(ch)
 
 class Sheet():
     """
-    Parses an Excel worksheet and builds Python objects based on the
-    following rules:
+    Parses an Excel worksheet and builds Python objects.
+
+    Two formats are accepted for sheets. The first is a simple 
+    table format, such as:
+        __________________________________________________
+        |    Key1     |   Key2    |   Key3    |   Key4    |  <-- Header Row
+        __________________________________________________
+        |    Item1    |   Item 2  |   Item 3  |   Item 4  |  <-- Object 1
+        __________________________________________________
+        |    Item1    |   Item 2  |   Item 3  |   Item 4  |  <-- Object 2
+
+    
+    The second format is a list of objects. This format is better suited
+    for scenarios where objects may have different numbers of variables
+    or need to support list or dictionary attributes. The following rules
+    apply:
         - Worksheet contains some number of similar object definitions
-        - Top line in worksheet is the first object; subsequent objects are
-        separated by a blank row
+        - Top line in worksheet starts the first object; subsequent objects are
+        separated by single blank rows
         - Lines not separated from previous object by blank row are part
         of the previous object
-        - Two cells that are side-by-side represent key-value pairs
-                    _________________________
-                    |    Key    |   Value   |
+        - Two cells that are side-by-side represent key-value pairs; e.g.:
+                _________________________
+                |    Key    |   Value   |
         - Lists are represented by a left-cell, blank right-cell, subsequent
-        single cells in a column under the blank right-cell
-                    ________________________
-                    |  Name    |   (blank)  |
-                    ________________________
-                    | (blank)   |   Item 1  |
-                    ________________________
-                    | (blank)   |   Item 2  |
-                    ________________________
-                    | (blank)   |   Item 3  |
+        single cells in a column under the blank right-cell; e.g.:
+                ________________________
+                |  Name    |   (blank)  |
+                ________________________
+                | (blank)   |   Item 1  |
+                ________________________
+                | (blank)   |   Item 2  |
+                ________________________
+                | (blank)   |   Item 3  |
          - Dictionaries are similar to lists, but with named indexes
-         in place of blank cells; supports multiple named indexes
-                    __________________________________________________
-                    |    Name    |   ID1     |    ID2     |   ID3     |
-                    __________________________________________________
-                    |    (blank)  |   Item 1  |    Item 1 |   Item 1  |
-                    __________________________________________________
-                    |    (blank)  |   Item 2  |    Item 2 |   Item 2  |
-                    __________________________________________________
-                    |    (blank)  |   Item 3  |    Item 3 |   Item 3  |
+         in place of blank cells; supports multiple named indexes; e.g.:
+                __________________________________________________
+                |    Name    |   ID1     |    ID2     |   ID3     |
+                __________________________________________________
+                |    (blank)  |   Item 1  |    Item 1 |   Item 1  |
+                __________________________________________________
+                |    (blank)  |   Item 2  |    Item 2 |   Item 2  |
+                __________________________________________________
+                |    (blank)  |   Item 3  |    Item 3 |   Item 3  |
 
     """
     
-    def __init__(self, worksheet):
+    def __init__(self, worksheet, **kwargs):
         '''
-        Initialize the worksheet object
+        Initialize the worksheet object and build collection objects
+
+        Acceptable keyword args are:
+            - sourceformat=<'list' | 'table'>
+                default is 'list'
         '''
         
+        self._kw_options = {}
+        for k, v in kwargs.iteritems():
+            self._kw_options[k] = v
+        logger.debug('keyword args are %s', str(self._kw_options))
+
         self._ws = worksheet
         self._objects = []
         
-        self.parse()
+        # Set default source_format = 'list'
+        self._source_format = 'list'
+        # Update source_format if it was manually set in class call
+        if 'sourceformat' in self._kw_options:
+            self._source_format = self._kw_options['sourceformat']
         
-    def parse(self):
+        logger.debug('source format for evaluating %s is %s', \
+            str(self._ws), str(self._source_format))
+
+        # Validate the source format is valid; call parse() with
+        # appropriate format
+        if self._source_format == 'table':
+            self.parse(format='table')
+        elif self._source_format == 'list':
+            self.parse(format='list')
+        else:
+            logger.error('Invalid sourceformat: %s', \
+                self._kw_options['sourceformat'])
+            return None
+        
+    def parse(self, format='list'):
         '''
         Parse the worksheet and identify objects
+
+        Acceptable keyword args are:
+            - format=<'list' | 'table'>
         '''
         
         logger.debug('Beginning parse() of %s' , self._ws)
         
-        this_obj = []
-        for row in self._ws.rows:
-            this_row = []
-            empty = True
-            for cell in row:
-                if cell.value:
-                    this_row.append(str(cell.value))
-                    empty = False
+        if format == 'list':
+            logger.debug('parsing as list...')
+            this_obj = []
+            for row in self._ws.rows:
+                this_row = []
+                empty = True
+                for cell in row:
+                    if cell.value:
+                        this_row.append(str(cell.value))
+                        empty = False
+                    else:
+                        this_row.append(cell.value)
+                if not empty:
+                    this_obj.append(this_row)
                 else:
-                    this_row.append(cell.value)
-            if not empty:
-                this_obj.append(this_row)
-            else:
+                    self._objects.append(this_obj)
+                    this_obj = []
+            if this_obj:
                 self._objects.append(this_obj)
-                this_obj = []
-        if this_obj:
-            self._objects.append(this_obj)
         
+        elif format == 'table':
+            logger.debug('parsing as table...')
+            keys = []
+            # Determine keys for key-value pairs
+            for cell in self._ws.rows[0]:
+                keys.append(cell.value)
+            logger.debug('keys are %s', str(keys))
+            # Cycle through remaining rows and build key-value pairs
+            # into object list; append object lists to list of sheet objects
+            for row in self._ws.rows[1:]:
+                this_obj = []
+                for idx in range(len(row)):
+                    key = str(keys[idx])
+                    val = str(row[idx].value)
+                    this_obj.append([key, val])
+                self._objects.append(this_obj)
+        
+        # Handle case where source format is not valid
+        else:
+            logger.error('Invalid sourceformat %s', format)
+            return None
+
         logger.debug('Completed parse() of %s', self._ws)
             
     def getCollections(self):
@@ -308,13 +376,22 @@ class Collection():
     
     
     
-def xlyaml(source, output=None, format='yaml'):
+def xlyaml(source, output=None, format='yaml', **kwargs):
     '''
     Primary function for building YAML document from workbook
     '''
     
+    options = {}
+    for k, v in kwargs.iteritems():
+        options[k] = v
+    if 'sourceformat' in options:
+        sourceformat = options['sourceformat']
+    else:
+        sourceformat = 'list'
+
     logger.info('Opening workbook %s', source)
-    
+    logger.info('Reading workbook in %s format', sourceformat)
+
     # Open workbook
     try:
         wb = load_workbook(source)
@@ -333,7 +410,7 @@ def xlyaml(source, output=None, format='yaml'):
     
     for sheet in worksheets:
         logger.info('Beginning evaluation of sheet %s', sheet)
-        sheetObject = Sheet(sheet)
+        sheetObject = Sheet(sheet, sourceformat=sourceformat)
         collectionObjects = sheetObject.getCollections()
         
         # Set up output file that will correlate to the current sheet
@@ -370,6 +447,9 @@ if __name__ == "__main__":
     parser.add_argument("-l", "--loglevel", 
             choices=['INFO', 'DEBUG'], default = 'INFO',
             help="Logging level; defaults to 'INFO'")
+    parser.add_argument("-f", "--sourceformat",
+            choices=['table', 'list'], default = 'list',
+            help="Format of Excel spreadsheet")
     args = parser.parse_args()
     
     if args.loglevel == 'INFO':
@@ -379,9 +459,11 @@ if __name__ == "__main__":
         logger.setLevel(logging.DEBUG)
         ch.setLevel(logging.DEBUG)
         logger.debug('Setting logging level to DEBUG')
+
+    sourceformat = args.sourceformat
         
     source = args.source
-    xlyaml(source)
+    xlyaml(source, sourceformat=sourceformat)
     
 '''####### TEST CASES #########
 
