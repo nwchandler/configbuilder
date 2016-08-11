@@ -68,25 +68,3 @@ Once you have a properly formatted workbook, you can execute xlyaml with the fol
 ## Using textbuilder
 
 To do...
-
-## Some notes on running Python files...
-
-Windows executable files can be obtained by [contacting Nick](mailto:nchandler@burwood.com); if you are not familiar with Python, this is the preferred way to use the configbuilder tools currently. If you prefer to leverage your own Python interpreter, I recommend that you look at using virtualenv and virtualenvwrapper in order to have sandbox environments for various Python projects you might want to use. (Nick is happy to help you with this process, but be prepared to do a little googling... Familiarity with Python will go a long way here.)
-
-Once you have your virtual environment running (or not, if you don't want to), use the command 'pip install -r requirements.txt' in order to install the extra modules that xlyaml and textbulider use.  
-
-## FAQ
-
-***How do I report bugs?***
-
-Use the [Issues][issues] feature in GitHub to report bugs.
-
-
-***How do I request new features?***
-
-Use the [Issues][issues] feature in GitHub to create a new feature request.
-
-## Contributing to configbuilder
-
-configbuilder is written in Python and is currently maintained by Nick Chandler. If you would like to work on the code, please [contact Nick](mailto:nchandler@burwood.com). If you would like to contribute, but don't feel comfortable coding, documentation contributions are welcome. Also, please let us know if you would like to see any features added, using the [Issues][issues] page, so we can continue to improve the tools and make them more useful over time.
-[issues]: https://github.com/Burwood/configbuilder/issues
